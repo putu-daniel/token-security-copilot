@@ -15,7 +15,15 @@
 | M4 — Polish + pitch | 🔴 Belum mulai | |
 
 ### 🧭 Keputusan scope (4 Jul)
-- **Batch "risk-screener" token trending → roadmap/M5, BUKAN sekarang.** Daniel nanya soal "screening coin yang berpotensi naik". Ditolak sebagai *pump-predictor* (bertabrakan dengan positioning security tool + janji yang gak bisa ditepati). Versi in-scope yang disetujui jadi ROADMAP SLIDE saja: scan daftar token trending (DEXScreener trending/new-pairs) → jalankan pipeline verdict → filter/rank by risk terendah = "buang landmine dari yang lagi rame". Framing: menyaring risiko, BUKAN prediksi harga. Bangun setelah core selesai.
+- **Batch "risk-screener" token trending** — awalnya di-defer ke roadmap, lalu **DIBANGUN 4 Jul malam sebagai "Radar"** setelah core (M1–M4) live semua, dengan framing yang disepakati: menyaring risiko, BUKAN prediksi harga/pump. Detail di bawah.
+
+### 📡 Radar — LIVE (4 Jul)
+- **Funnel lengkap: research market → check security.** `/radar` = discovery layer.
+- Sumber: DEXScreener `token-boosts/top/v1` (token yang **bayar promosi** sekarang = proxy "viral" jujur). Adapter: `lib/sources/radar-feed.ts`.
+- `/api/radar`: batch 12 token → pipeline existing (market + GoPlus/Helius + heuristics, **tanpa AI**) → ranking risk-first. ~9 detik, CDN cache 2 menit.
+- Kolom whale structure (top10 % + dev %) = indikator rug jangka pendek (permintaan Daniel). Forensics penuh TIDAK di batch (rate limit) — klik baris → `/?address=...` auto-scan (page.tsx baca query param).
+- ⚠️ Jaga framing di semua copy: "menyaring jebakan dari yang lagi rame", momentum = Δ24h faktual. JANGAN pernah tulis "potensi naik".
+- Anekdot pitch: FREEDOM250 (HIGH RISK pagi 4 Jul, liq $34.9k) → sore liq $5k (-85%), muncul di radar dengan 2 danger. Verdict terbukti dalam sehari.
 
 ---
 
