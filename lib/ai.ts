@@ -2,7 +2,7 @@
 // Server-side ONLY. Key never reaches the browser.
 import type {
   AiReport, MarketData, SecurityResult, Signal,
-  TraceCluster, TraceHolder, TraceReport,
+  TraceCluster, TraceHolder, TraceReport, RepeatFunderInfo,
 } from "@/lib/types";
 
 async function callClaude(prompt: string, maxTokens: number): Promise<string> {
@@ -83,8 +83,15 @@ export async function runTraceAnalysis(
   token: string,
   chain: string,
   traced: TraceHolder[],
-  clusters: TraceCluster[]
+  clusters: TraceCluster[],
+  repeatFunders: RepeatFunderInfo[] = []
 ): Promise<TraceReport> {
+  const repeatBlock = repeatFunders.length
+    ? `FORENSIC MEMORY — repeat funders (SERIOUS signal): these funders were previously ` +
+      `seen funding top holders of OTHER tokens we traced. outcome "died" = that token ` +
+      `already collapsed. A funder recurring across tokens — especially dead ones — is a ` +
+      `strong serial-operator pattern; weight it heavily:\n${JSON.stringify(repeatFunders)}\n\n`
+    : "";
   const prompt =
     `You are a blockchain forensics analyst. Below is a funding-trace of a DEX token's top holders: ` +
     `for each holder wallet, "funder" = the address that sent its FIRST incoming transaction.\n\n` +
@@ -92,6 +99,7 @@ export async function runTraceAnalysis(
     `Token: ${token} (chain: ${chain})\n` +
     `Holders (pctHeld = fraction of supply): ${JSON.stringify(traced)}\n` +
     `Detected clusters (holders sharing one funder): ${JSON.stringify(clusters)}\n\n` +
+    repeatBlock +
     `Respond with ONLY a JSON object, no markdown fences:\n` +
     `{"suspicion":"HIGH"|"MODERATE"|"LOW",` +
     `"summary":"one sentence in plain language",` +

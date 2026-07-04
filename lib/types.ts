@@ -83,10 +83,16 @@ export interface TraceReport {
   reasoning: string;
 }
 
+export interface RepeatFunderInfo {
+  funder: string;
+  tokens: { address: string; symbol: string | null; outcome: string | null }[];
+}
+
 export interface TraceResponse {
   chain: string;
   traced: TraceHolder[];
   clusters: TraceCluster[];
+  repeatFunders: RepeatFunderInfo[];  // funder yang pernah muncul di token lain
   report: TraceReport | null;
   aiError?: string;
 }

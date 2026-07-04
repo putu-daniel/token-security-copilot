@@ -83,6 +83,35 @@ export function TraceSection({ address }: { address: string }) {
 
       {res && (
         <>
+          {res.repeatFunders?.length > 0 && (
+            <div className="clusterbox" style={{ borderColor: "var(--danger)" }}>
+              <div className="clhd" style={{ color: "var(--danger)", borderColor: "rgba(255,65,96,0.3)" }}>
+                <span className="pulsedot" style={{ background: "var(--danger)", boxShadow: "0 0 10px var(--danger)" }} />
+                repeat funder · forensic memory
+              </div>
+              <div className="clbody">
+                {res.repeatFunders.map((rf) => (
+                  <p key={rf.funder} style={{ margin: "8px 0 0", fontSize: 12.5, lineHeight: 1.6 }}>
+                    Funder{" "}
+                    <span className="mono" style={{ color: "var(--danger)" }}>{shortAddr(rf.funder)}</span>
+                    {" "}pernah mendanai top holder di{" "}
+                    <b>{rf.tokens.length} token lain</b>:{" "}
+                    {rf.tokens.map((t, i) => (
+                      <span key={t.address}>
+                        {i > 0 && ", "}
+                        <span className="mono">{t.symbol ?? shortAddr(t.address)}</span>
+                        {t.outcome === "died" && (
+                          <span className="tag" style={{ color: "var(--danger)" }}>died</span>
+                        )}
+                      </span>
+                    ))}
+                    {" "}— pola operator serial.
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+
           {res.clusters.length > 0 ? (
             res.clusters.map((c, i) => (
               <div className="clusterbox" key={c.funder}>

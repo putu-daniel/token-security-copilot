@@ -2,8 +2,9 @@
 // detection -> AI reasoning.
 // EVM (ethereum/arbitrum/polygon): Etherscan V2. Solana: Helius RPC.
 // BSC/Base/Optimism: nunggu adapter provider lain (Etherscan free gak cover).
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { fetchMarket } from "@/lib/sources/dexscreener";
+import { lookupRepeatFunders, logTrace } from "@/lib/funder-memory";
 import { fetchSecurity } from "@/lib/sources/goplus";
 import { traceFunders, isTraceableChain, TRACEABLE_CHAINS } from "@/lib/sources/etherscan";
 import { traceSolanaFunders } from "@/lib/sources/solana-trace";
@@ -119,19 +120,32 @@ export async function POST(req: Request) {
 
   const clusters = detectClusters(traced);
 
-  const out: TraceResponse = { chain: market.chainId, traced, clusters, report: null };
+  // Memori forensik: funder ini pernah muncul di token lain?
+  const uniqueFunders = [...new Set(traced.map((t) => t.funder).filter(Boolean))] as string[];
+  const repeatFunders = await lookupRepeatFunders(address, uniqueFunders);
+
+  const out: TraceResponse = {
+    chain: market.chainId, traced, clusters, repeatFunders, report: null,
+  };
   if (process.env.OPENROUTER_API_KEY) {
     try {
       out.report = await runTraceAnalysis(
         `${market.tokenName} ($${market.symbol})`,
         market.chainId,
         traced,
-        clusters
+        clusters,
+        repeatFunders
       );
     } catch (e: any) {
       out.aiError = e?.message ?? "AI trace analysis failed";
     }
   }
+
+  // Simpan trace ini ke memori SETELAH response (gak nambah latency user)
+  const clusterFunders = new Set(clusters.map((c) => c.funder));
+  after(() =>
+    logTrace(address, market.chainId, market.symbol, traced, clusterFunders)
+  );
 
   return NextResponse.json(out);
 }

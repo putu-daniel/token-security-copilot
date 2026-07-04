@@ -17,6 +17,19 @@
 ### 🧭 Keputusan scope (4 Jul)
 - **Batch "risk-screener" token trending** — awalnya di-defer ke roadmap, lalu **DIBANGUN 4 Jul malam sebagai "Radar"** setelah core (M1–M4) live semua, dengan framing yang disepakati: menyaring risiko, BUKAN prediksi harga/pump. Detail di bawah.
 
+### 🧠 Self-improving — roadmap 4 mekanisme (dibahas 4 Jul)
+1. **Kalibrasi threshold dari outcome** (SQL, butuh volume data) — roadmap
+2. **Suntik statistik historis ke prompt AI** ("token profil begini mati 78% dalam 7d") — kandidat build berikutnya, murah
+3. ~~**Memori forensik / serial-rugger DB**~~ → **LIVE 4 Jul malam** (lihat bawah)
+4. **ML classifier** prediksi mati-7-hari — jangka panjang, butuh ribuan scan berlabel
+⚠️ Framing pitch: "self-improving feedback loop" — JANGAN klaim "AI-nya belajar sendiri" (gak ada fine-tuning).
+
+### 🧠 Memori forensik (serial-rugger detection) — LIVE (4 Jul)
+- Tabel `trace_funders` (Supabase): tiap trace menyimpan funder→holder per token (re-trace = replace). `lib/funder-memory.ts`.
+- `/api/trace`: sebelum AI, `lookupRepeatFunders()` — funder yang pernah muncul di token LAIN (+ outcome died dari `scans`). Hasilnya masuk response (`repeatFunders`), prompt AI (bobot berat), dan UI (kotak merah "repeat funder · forensic memory").
+- **Terverifikasi dengan tes sintetis**: token fiktif RUGME (died) berbagi funder → trace ulang FREEDOM250 → suspicion melompat LOW→HIGH, AI menyebut "serial rug-operator on another (now-dead) token". Memori mengubah verdict = self-improving yang demoable.
+- Efek jaringan: tiap trace user mana pun memperkaya memori → makin dipakai makin pintar.
+
 ### 📡 Radar — LIVE (4 Jul)
 - **Funnel lengkap: research market → check security.** `/radar` = discovery layer.
 - Sumber: DEXScreener `token-boosts/top/v1` (token yang **bayar promosi** sekarang = proxy "viral" jujur). Adapter: `lib/sources/radar-feed.ts`.
