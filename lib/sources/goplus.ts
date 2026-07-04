@@ -50,7 +50,10 @@ export async function fetchSecurity(
     return {
       source: "goplus/evm",
       holderCount: t.holder_count ? Number(t.holder_count) : null,
-      top10Pct: whales.slice(0, 10).reduce((s, h) => s + h.pctHeld, 0),
+      // Empty holders = data unavailable, NOT zero concentration
+      top10Pct: whales.length
+        ? whales.slice(0, 10).reduce((s, h) => s + h.pctHeld, 0)
+        : null,
       creatorPct: toFrac(t.creator_percent),
       ownerPct: toFrac(t.owner_percent),
       honeypot: toBool(t.is_honeypot),
@@ -90,7 +93,9 @@ async function fetchSolana(address: string): Promise<SecurityResult> {
   return {
     source: "goplus/solana",
     holderCount: t.holder_count ? Number(t.holder_count) : null,
-    top10Pct: whales.slice(0, 10).reduce((s, h) => s + h.pctHeld, 0),
+    top10Pct: whales.length
+      ? whales.slice(0, 10).reduce((s, h) => s + h.pctHeld, 0)
+      : null,
     creatorPct:
       (t.creators ?? []).reduce(
         (s: number, c: any) => s + (toFrac(c.percent) ?? 0), 0
