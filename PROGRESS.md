@@ -58,7 +58,7 @@
 
 1. [x] **Deploy Vercel** (4 Jul) — live di https://token-security-copilot.vercel.app, API terverifikasi jalan (signals-only)
 2. [x] **`OPENROUTER_API_KEY` di Vercel** (4 Jul) — terpasang, redeploy done, AI verdict terverifikasi live (CAKE → CAUTION/28) → **M1 TUTUP**
-3. [~] **Git** (4 Jul): `git init` + 2 commit lokal done (`.env.local` terverifikasi ter-ignore). **Sisa bagian Daniel:** buat repo GitHub → `git remote add origin <url>` → `git push -u origin main` → connect di Vercel (Settings → Git) biar auto-deploy
+3. [x] **Git + auto-deploy** (4 Jul): repo live di github.com/putu-daniel/token-security-copilot, terhubung ke Vercel → tiap push ke `main` auto-deploy production
 4. [x] **Deadline dikonfirmasi masih lama** (owner, 4 Jul) → M3 versi penuh masuk scope. Makin lama app live + M3 jalan = makin banyak data accuracy buat pitch
 5. [ ] **Mulai M2 — wallet forensics**: `lib/sources/etherscan.ts` + `/api/trace` — first incoming tx per top-10 holder = funder → cluster detection → kirim graph ke AI. Butuh Etherscan API key (gratis, 5 req/s → queue + delay)
 6. [ ] Review arsitektur setelah deploy pertama, sebelum masuk M2 (handoff §8 item 4)
