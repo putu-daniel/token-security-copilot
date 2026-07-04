@@ -7,8 +7,8 @@ import { WhaleTable } from "@/components/WhaleTable";
 import { VerdictCard } from "@/components/VerdictCard";
 import { TraceSection } from "@/components/TraceSection";
 
-// Chain yang dicakup Etherscan free tier — sinkron dengan lib/sources/etherscan.ts
-const TRACEABLE_CHAINS = new Set(["ethereum", "arbitrum", "polygon"]);
+// Sinkron dengan app/api/trace/route.ts: Etherscan free tier + solana (Helius)
+const TRACEABLE_CHAINS = new Set(["ethereum", "arbitrum", "polygon", "solana"]);
 
 export default function Home() {
   const [addr, setAddr] = useState("");
