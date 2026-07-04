@@ -58,7 +58,7 @@
 
 1. [x] **Deploy Vercel** (4 Jul) — live di https://token-security-copilot.vercel.app, API terverifikasi jalan (signals-only)
 2. [x] **`OPENROUTER_API_KEY` di Vercel** (4 Jul) — terpasang, redeploy done, AI verdict terverifikasi live (CAKE → CAUTION/28) → **M1 TUTUP**
-3. [ ] **`git init`** — folder belum jadi git repo (`.gitignore` sudah benar meng-ignore `.env.local`). Push ke GitHub + connect ke Vercel biar auto-deploy tiap push
+3. [~] **Git** (4 Jul): `git init` + 2 commit lokal done (`.env.local` terverifikasi ter-ignore). **Sisa bagian Daniel:** buat repo GitHub → `git remote add origin <url>` → `git push -u origin main` → connect di Vercel (Settings → Git) biar auto-deploy
 4. [x] **Deadline dikonfirmasi masih lama** (owner, 4 Jul) → M3 versi penuh masuk scope. Makin lama app live + M3 jalan = makin banyak data accuracy buat pitch
 5. [ ] **Mulai M2 — wallet forensics**: `lib/sources/etherscan.ts` + `/api/trace` — first incoming tx per top-10 holder = funder → cluster detection → kirim graph ke AI. Butuh Etherscan API key (gratis, 5 req/s → queue + delay)
 6. [ ] Review arsitektur setelah deploy pertama, sebelum masuk M2 (handoff §8 item 4)
@@ -68,6 +68,13 @@
 ## 📌 Keputusan menggantung
 
 - **Burn address di heuristic `top10Pct`** ([lib/sources/goplus.ts](lib/sources/goplus.ts), kalkulasi top10): CAKE kena danger "96,6%" padahal 92,7% burn. AI layer sudah mengompensasi, tapi signals layer masih over-flag. Opsi: exclude `0x...dead` / holder `is_locked` dari kalkulasi. Belum diputuskan — handoff bilang "port apa adanya", jadi perubahan ini opsional.
+- ~~Bug top10Pct 0.0% saat holder kosong~~ → **FIXED 4 Jul** (commit `8aa66c3`): holder kosong sekarang `null` → tampil "—", terverifikasi live dengan FREEDOM250.
+
+## 🔜 Rencana berikutnya (disepakati 4 Jul)
+
+1. **Adapter Solana holders** (`lib/sources/solana-holders.ts`): `getTokenLargestAccounts` + `getTokenSupply` via Helius free tier → top-10 % beneran untuk token pump.fun. ⚠️ Gotcha: exclude/tag vault pool AMM (pakai `pairAddress` dari DEXScreener) biar top10 gak melambung palsu. Data holder DEXScreener web TIDAK tersedia di API publiknya.
+2. **Supabase insert per scan** (cicilan M3) — mulai nabung data accuracy.
+3. **M2 wallet forensics** — Etherscan (EVM) + Helius (Solana).
 
 ## 🧪 Test case yang sudah dipakai
 
