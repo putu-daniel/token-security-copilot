@@ -50,7 +50,7 @@ export async function fetchSolanaHolders(
       top10Pct: nonPool.length
         ? nonPool.slice(0, 10).reduce((s, w) => s + w.pctHeld, 0)
         : null,
-      whales: whales.slice(0, 5),
+      whales: whales.slice(0, 10),
     };
   } catch {
     return null;

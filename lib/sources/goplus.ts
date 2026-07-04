@@ -66,7 +66,7 @@ export async function fetchSecurity(
       openSource: t.is_open_source != null ? toBool(t.is_open_source) : null,
       hiddenOwner: toBool(t.hidden_owner),
       takeBackOwnership: toBool(t.can_take_back_ownership),
-      whales: whales.slice(0, 5),
+      whales: whales.slice(0, 10), // top-10: dipakai M2 funding trace
     };
   } catch {
     return null;
@@ -145,6 +145,6 @@ async function fetchSolana(address: string): Promise<SecurityResult> {
     openSource: null,
     hiddenOwner: null,
     takeBackOwnership: null,
-    whales: whales.slice(0, 5),
+    whales: whales.slice(0, 10),
   };
 }

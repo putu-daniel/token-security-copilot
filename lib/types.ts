@@ -61,6 +61,36 @@ export interface AiReport {
   reasoning: string;
 }
 
+// M2 — wallet forensics
+export interface TraceHolder {
+  holder: string;
+  pctHeld: number;          // fraction
+  funder: string | null;
+  txHash: string | null;
+  firstTxAge: string | null;
+}
+
+export interface TraceCluster {
+  funder: string;
+  holders: string[];        // ≥2 holder yang di-fund address sama
+  combinedPct: number;      // fraction — total supply yang dikuasai cluster
+}
+
+export interface TraceReport {
+  suspicion: "HIGH" | "MODERATE" | "LOW";
+  summary: string;
+  findings: string[];
+  reasoning: string;
+}
+
+export interface TraceResponse {
+  chain: string;
+  traced: TraceHolder[];
+  clusters: TraceCluster[];
+  report: TraceReport | null;
+  aiError?: string;
+}
+
 export interface AnalyzeResponse {
   market: MarketData;
   security: SecurityResult;

@@ -5,6 +5,10 @@ import { fmtUsd, fmtAgeH, pct, lvlColor } from "@/lib/format";
 import { MetricsGrid } from "@/components/MetricsGrid";
 import { WhaleTable } from "@/components/WhaleTable";
 import { VerdictCard } from "@/components/VerdictCard";
+import { TraceSection } from "@/components/TraceSection";
+
+// Chain yang dicakup Etherscan free tier — sinkron dengan lib/sources/etherscan.ts
+const TRACEABLE_CHAINS = new Set(["ethereum", "arbitrum", "polygon"]);
 
 export default function Home() {
   const [addr, setAddr] = useState("");
@@ -122,6 +126,10 @@ export default function Home() {
             </div>
           ))}
         </div>
+      )}
+
+      {res && m && TRACEABLE_CHAINS.has(m.chainId) && secOk && (
+        <TraceSection address={addr.trim()} />
       )}
 
       {res?.report && (
