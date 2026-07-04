@@ -10,7 +10,7 @@
 | Milestone | Status | Catatan |
 |---|---|---|
 | M1 — Port + deploy | ✅ **SELESAI (4 Jul)** | Live full (AI verdict aktif) di https://token-security-copilot.vercel.app |
-| M2 — Wallet forensics | 🔴 Belum mulai | Fitur pembeda utama, porsi waktu terbesar |
+| M2 — Wallet forensics | 🟡 **Inti LIVE (4 Jul)** | Funding trace + cluster detection + AI forensics jalan di production (ethereum/arbitrum/polygon). Sisa: adapter BSC (Moralis/Covalent) + Solana (Helius) |
 | M3 — Scan history + outcome | 🟡 **Layer 1 LIVE (4 Jul)** | Tiap scan tercatat ke Supabase (tabel `scans`, RLS on). Sisa: cron re-check 24h/7d + accuracy table |
 | M4 — Polish + pitch | 🔴 Belum mulai | |
 
@@ -74,7 +74,11 @@
 
 1. ~~Adapter Solana holders~~ → **SELESAI 4 Jul, live di production.** `lib/sources/solana-holders.ts` (Helius: `getTokenLargestAccounts` + `getTokenSupply`), fallback di `fetchSolana` goplus.ts. Holder >5% di-tag "(likely pool)" & di-exclude dari top10Pct. Env var `HELIUS_RPC_URL` terpasang lokal + Vercel. Catatan: data holder DEXScreener web TIDAK tersedia di API publiknya — makanya via Helius.
 2. ~~Supabase insert per scan~~ → **LIVE 4 Jul.** `lib/scan-log.ts` (REST PostgREST, fire-and-forget via `after()`), tabel `scans` di project Supabase `token-security-copilot` (region SG, RLS on, akses via secret key `sb_secret_...` server-side). Baris pertama: CAKE CAUTION/28 07:02 UTC. Sisa M3 nanti: Vercel cron re-check 24h/7d + halaman accuracy.
-3. **M2 wallet forensics** — Etherscan (EVM) + Helius (Solana, key sudah ada). ← NEXT, kerjaan besar.
+3. ~~M2 inti~~ → **LIVE 4 Jul.** `/api/trace`: top-10 holder → first-funder (Etherscan V2, sequential 250ms) → cluster ≥2 holder se-funder → AI forensics (`runTraceAnalysis`). UI: `TraceSection` (tombol muncul di chain yang didukung). Teruji PEPE: 9 holder, 0 cluster palsu, AI diskon exchange wallet.
+   ⚠️ **Etherscan free tier cuma cover ethereum/arbitrum/polygon** (diverifikasi) — BSC/Base/Optimism minta paid.
+4. **M2 lanjutan — BSC trace** (penting: hackathon BNB Chain!): bikin adapter Moralis atau Covalent GoldRush (free tier cover BSC) → `lib/sources/<provider>.ts`, slot di `traceFunders`. Demo ideal: token sketchy BSC dengan cluster kedetect.
+5. **M2 lanjutan — Solana trace** via Helius (`getSignaturesForAddress` + parsed tx).
+6. **M3 lanjutan** — Vercel cron re-check 24h/7d + halaman accuracy.
 
 ## 🐛 Bug yang sudah difix (4 Jul)
 
