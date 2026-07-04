@@ -14,6 +14,9 @@
 | M3 — Scan history + outcome | 🟡 **Layer 1 LIVE (4 Jul)** | Tiap scan tercatat ke Supabase (tabel `scans`, RLS on). Sisa: cron re-check 24h/7d + accuracy table |
 | M4 — Polish + pitch | 🔴 Belum mulai | |
 
+### 🧭 Keputusan scope (4 Jul)
+- **Batch "risk-screener" token trending → roadmap/M5, BUKAN sekarang.** Daniel nanya soal "screening coin yang berpotensi naik". Ditolak sebagai *pump-predictor* (bertabrakan dengan positioning security tool + janji yang gak bisa ditepati). Versi in-scope yang disetujui jadi ROADMAP SLIDE saja: scan daftar token trending (DEXScreener trending/new-pairs) → jalankan pipeline verdict → filter/rank by risk terendah = "buang landmine dari yang lagi rame". Framing: menyaring risiko, BUKAN prediksi harga. Bangun setelah core selesai.
+
 ---
 
 ## ✅ Selesai (4 Juli 2026)
