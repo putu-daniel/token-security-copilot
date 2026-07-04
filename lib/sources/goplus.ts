@@ -2,6 +2,7 @@
 // GOTCHA: all percent fields are FRACTIONS (0.056 = 5.6%).
 // GOTCHA: EVM result is keyed by LOWERCASE address.
 import type { SecurityResult, WhaleHolder } from "@/lib/types";
+import { fetchSolanaHolders } from "@/lib/sources/solana-holders";
 
 // DEXScreener chain slug -> GoPlus numeric chain id
 const CHAIN_IDS: Record<string, string> = {
@@ -80,9 +81,30 @@ async function fetchSolana(address: string): Promise<SecurityResult> {
   const data = await res.json();
   const keys = Object.keys(data.result ?? {});
   const t = data.result?.[address] ?? (keys.length ? data.result[keys[0]] : null);
-  if (!t) return null;
+  if (!t) {
+    // GoPlus gak kenal token ini sama sekali — coba holder data dari Helius saja
+    const helius = await fetchSolanaHolders(address);
+    if (!helius) return null;
+    return {
+      source: "helius",
+      holderCount: null,
+      top10Pct: helius.top10Pct,
+      creatorPct: null,
+      ownerPct: null,
+      honeypot: null,
+      mintable: null,
+      freezable: null,
+      buyTax: null,
+      sellTax: null,
+      lpLockedPct: null,
+      openSource: null,
+      hiddenOwner: null,
+      takeBackOwnership: null,
+      whales: helius.whales,
+    };
+  }
 
-  const whales: WhaleHolder[] = (t.holders ?? []).map((h: any) => ({
+  let whales: WhaleHolder[] = (t.holders ?? []).map((h: any) => ({
     address: h.account ?? h.address,
     pctHeld: toFrac(h.percent) ?? 0,
     tag: h.tag ?? "",
@@ -90,12 +112,25 @@ async function fetchSolana(address: string): Promise<SecurityResult> {
     isLocked: toBool(h.is_locked),
   }));
 
+  // GoPlus sering belum punya holder data untuk token pump.fun baru —
+  // fallback ke Helius RPC (top10Pct di sana sudah exclude vault pool).
+  let top10Pct = whales.length
+    ? whales.slice(0, 10).reduce((s, h) => s + h.pctHeld, 0)
+    : null;
+  let source = "goplus/solana";
+  if (!whales.length) {
+    const helius = await fetchSolanaHolders(address);
+    if (helius) {
+      whales = helius.whales;
+      top10Pct = helius.top10Pct;
+      source = "goplus/solana + helius";
+    }
+  }
+
   return {
-    source: "goplus/solana",
+    source,
     holderCount: t.holder_count ? Number(t.holder_count) : null,
-    top10Pct: whales.length
-      ? whales.slice(0, 10).reduce((s, h) => s + h.pctHeld, 0)
-      : null,
+    top10Pct,
     creatorPct:
       (t.creators ?? []).reduce(
         (s: number, c: any) => s + (toFrac(c.percent) ?? 0), 0
