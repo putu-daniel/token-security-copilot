@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { AnalyzeResponse } from "@/lib/types";
 import { fmtUsd, fmtAgeH, pct, lvlColor } from "@/lib/format";
 import { MetricsGrid } from "@/components/MetricsGrid";
@@ -17,8 +17,8 @@ export default function Home() {
   const [err, setErr] = useState("");
   const [res, setRes] = useState<AnalyzeResponse | null>(null);
 
-  const analyze = async () => {
-    const address = addr.trim();
+  const analyze = async (addressParam?: string) => {
+    const address = (addressParam ?? addr).trim();
     if (!address || busy) return;
     setBusy(true); setErr(""); setRes(null);
     setStatusMsg("› pulling market structure + scanning holders…");
@@ -38,6 +38,13 @@ export default function Home() {
     }
   };
 
+  // Klik dari /radar mendarat di /?address=... -> isi input + auto-scan sekali
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("address");
+    if (q) { setAddr(q); analyze(q); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const m = res?.market;
   const sec = res?.security;
   const secOk = sec && !("unsupported" in sec);
@@ -46,9 +53,14 @@ export default function Home() {
     <main className="wrap">
       <div className="eyebrow">on-chain risk // pre-entry check</div>
       <h1>Token Security Copilot</h1>
-      <a href="/accuracy" className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>
-        › accuracy tracking
-      </a>
+      <div style={{ display: "flex", gap: 16 }}>
+        <a href="/radar" className="mono" style={{ fontSize: 13, color: "var(--accent)" }}>
+          › radar — token yang lagi rame, sudah di-screen
+        </a>
+        <a href="/accuracy" className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>
+          › accuracy
+        </a>
+      </div>
       <p className="sub">
         Paste a contract address. The copilot pulls market structure + on-chain
         security (holders, dev wallet, honeypot, LP lock) and reasons through
@@ -62,7 +74,7 @@ export default function Home() {
           onKeyDown={(e) => e.key === "Enter" && analyze()}
           placeholder="0x… or Solana mint address"
         />
-        <button onClick={analyze} disabled={busy}>Analyze</button>
+        <button onClick={() => analyze()} disabled={busy}>Analyze</button>
       </div>
 
       {busy && (
