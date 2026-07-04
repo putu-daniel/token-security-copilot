@@ -1,7 +1,8 @@
 // Orchestrator: address in -> { market, security, signals, report } out.
 // Degrades gracefully: AI failure still returns signals (never a dead end).
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { fetchMarket } from "@/lib/sources/dexscreener";
+import { logScan } from "@/lib/scan-log";
 import { fetchSecurity } from "@/lib/sources/goplus";
 import { marketSignals, securitySignals } from "@/lib/heuristics";
 import { runAnalysis } from "@/lib/ai";
@@ -54,6 +55,9 @@ export async function POST(req: Request) {
       out.aiError = e?.message ?? "AI analysis failed";
     }
   }
+
+  // M3: log scan SETELAH response terkirim (after = gak nambah latency user)
+  after(() => logScan(address, out));
 
   return NextResponse.json(out);
 }
