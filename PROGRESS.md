@@ -72,9 +72,15 @@
 
 ## 🔜 Rencana berikutnya (disepakati 4 Jul)
 
-1. **Adapter Solana holders** (`lib/sources/solana-holders.ts`): `getTokenLargestAccounts` + `getTokenSupply` via Helius free tier → top-10 % beneran untuk token pump.fun. ⚠️ Gotcha: exclude/tag vault pool AMM (pakai `pairAddress` dari DEXScreener) biar top10 gak melambung palsu. Data holder DEXScreener web TIDAK tersedia di API publiknya.
+1. ~~Adapter Solana holders~~ → **SELESAI 4 Jul, live di production.** `lib/sources/solana-holders.ts` (Helius: `getTokenLargestAccounts` + `getTokenSupply`), fallback di `fetchSolana` goplus.ts. Holder >5% di-tag "(likely pool)" & di-exclude dari top10Pct. Env var `HELIUS_RPC_URL` terpasang lokal + Vercel. Catatan: data holder DEXScreener web TIDAK tersedia di API publiknya — makanya via Helius.
 2. **Supabase insert per scan** (cicilan M3) — mulai nabung data accuracy.
-3. **M2 wallet forensics** — Etherscan (EVM) + Helius (Solana).
+3. **M2 wallet forensics** — Etherscan (EVM) + Helius (Solana, key sudah ada).
+
+## 🐛 Bug yang sudah difix (4 Jul)
+
+- top10Pct 0.0% saat holder kosong → `null`/"—" (commit `8aa66c3`)
+- AI verdict hilang-timbul: JSON kepotong `max_tokens: 1200` → naik ke 2500 (commit `ea3a295`). Gejala: `aiError: Unterminated string in JSON`.
+- Dev server crash `EINVAL readlink .next` → gara-gara OneDrive sync; solusi: hapus `.next`, rerun. Kalau kambuh terus, pertimbangkan pindah project keluar folder OneDrive.
 
 ## 🧪 Test case yang sudah dipakai
 
@@ -82,3 +88,5 @@
 |---|---|---|---|
 | Democratize | Robinhood | 1 warn, holder data unavailable (fallback jujur) | Prototype HTML (pre-port) |
 | CAKE | BSC | CAUTION / 32, burn address terdiskon oleh AI | Port Next.js + OpenRouter Sonnet 5 (4 Jul) |
+| FREEDOM250 | Solana (pump.fun) | HIGH RISK / 80 · Helius fallback: pool 13.4% ke-tag, top10 bersih 3.1% | Adapter Helius production (4 Jul) |
+| BONK | Solana | CAUTION / 45 · jalur GoPlus murni utuh (top10 40.3%, 1jt holder) | Kontrol adapter (4 Jul) |
