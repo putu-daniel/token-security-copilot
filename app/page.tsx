@@ -92,6 +92,15 @@ export default function Home() {
             <span className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>
               ${m.symbol} · {m.chainId} · {m.dexId} · pair age {fmtAgeH(m.pairAgeHours)}
             </span>
+            <a
+              className="mono"
+              href={`https://dexscreener.com/${m.chainId}/${addr.trim()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 12, color: "var(--accent)", marginLeft: "auto" }}
+            >
+              chart di DEXScreener ↗
+            </a>
           </div>
           <MetricsGrid items={[
             ["Price", m.priceUsd ? `$${m.priceUsd}` : "—"],
