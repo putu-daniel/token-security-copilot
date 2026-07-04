@@ -56,7 +56,8 @@ export async function runAnalysis(
     },
     body: JSON.stringify({
       model: "anthropic/claude-sonnet-5",
-      max_tokens: 1200,
+      // 1200 kadang motong JSON di tengah string (Sonnet 5 tokenizer lebih boros)
+      max_tokens: 2500,
       messages: [{ role: "user", content: prompt }],
     }),
   });
