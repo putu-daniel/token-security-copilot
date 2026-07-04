@@ -1,7 +1,8 @@
 "use client";
-// M2 UI — tombol trace + hasil cluster. Muncul cuma untuk chain EVM.
+// M2 UI — tombol trace + hasil cluster. Muncul cuma untuk chain yang didukung.
+// Cluster divisualkan sebagai GRAF (funder -> holders), bukan cuma teks.
 import { useState } from "react";
-import type { TraceResponse } from "@/lib/types";
+import type { TraceCluster, TraceResponse } from "@/lib/types";
 import { shortAddr, pct } from "@/lib/format";
 
 const susColor: Record<string, string> = {
@@ -9,6 +10,33 @@ const susColor: Record<string, string> = {
   MODERATE: "var(--warn)",
   LOW: "var(--safe)",
 };
+
+// Graf sederhana: funder di atas-tengah, holder dikipas di bawah.
+function ClusterGraph({ cluster }: { cluster: TraceCluster }) {
+  const n = cluster.holders.length;
+  const W = 300, H = 128, fy = 26, hy = 102, r = 8;
+  const fx = W / 2;
+  const xs = cluster.holders.map((_, i) => ((i + 1) * W) / (n + 1));
+  return (
+    <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} role="img"
+      aria-label={`${n} holder di-fund dari address yang sama`}>
+      <g stroke="var(--mag)" strokeWidth="1.5" opacity="0.75">
+        {xs.map((x, i) => <line key={i} x1={fx} y1={fy} x2={x} y2={hy - r} />)}
+      </g>
+      <g fill="var(--mag)" opacity="0.85">
+        {xs.map((x, i) => <circle key={i} cx={x} cy={hy} r={r} />)}
+      </g>
+      <circle cx={fx} cy={fy} r="12" fill="var(--bg)" stroke="var(--mag)" strokeWidth="2.5"
+        style={{ filter: "drop-shadow(0 0 8px rgba(255,61,154,0.7))" }} />
+      <text x={fx} y="10" fill="var(--mag)" fontSize="9" textAnchor="middle"
+        fontFamily="var(--mono)">funder {shortAddr(cluster.funder)}</text>
+      <text x={fx} y={H - 4} fill="var(--muted)" fontSize="9" textAnchor="middle"
+        fontFamily="var(--mono)">
+        {n} holder · gabungan {pct(cluster.combinedPct)} supply
+      </text>
+    </svg>
+  );
+}
 
 export function TraceSection({ address }: { address: string }) {
   const [busy, setBusy] = useState(false);
@@ -39,7 +67,7 @@ export function TraceSection({ address }: { address: string }) {
       <div className="seclabel">wallet forensics · funding trace</div>
 
       {!res && (
-        <button onClick={trace} disabled={busy} style={{ marginTop: 4 }}>
+        <button onClick={trace} disabled={busy} style={{ marginTop: 4, padding: "11px 24px" }}>
           {busy ? "tracing funders…" : "Trace holder funding"}
         </button>
       )}
@@ -56,26 +84,33 @@ export function TraceSection({ address }: { address: string }) {
       {res && (
         <>
           {res.clusters.length > 0 ? (
-            res.clusters.map((c) => (
-              <div className="sig" key={c.funder} style={{ color: "var(--danger)" }}>
-                [CLUSTER]{" "}
-                <span style={{ color: "var(--text)" }}>
-                  {c.holders.length} holder ({c.holders.map(shortAddr).join(", ")}) di-fund
-                  dari address yang sama {shortAddr(c.funder)} — gabungan{" "}
-                  {pct(c.combinedPct)} supply
-                </span>
+            res.clusters.map((c, i) => (
+              <div className="clusterbox" key={c.funder}>
+                <div className="clhd">
+                  <span className="pulsedot" /> cluster detected · funding graph
+                </div>
+                <div className="clbody">
+                  <ClusterGraph cluster={c} />
+                  <p style={{ margin: "8px 0 0", fontSize: 12.5, lineHeight: 1.55 }}>
+                    {c.holders.length} holder ({c.holders.map(shortAddr).join(", ")}) di-fund
+                    dari address yang sama{" "}
+                    <span className="mono" style={{ color: "var(--mag)" }}>{shortAddr(c.funder)}</span>
+                    {" "}— gabungan <b>{pct(c.combinedPct)}</b> supply.
+                    {i === 0 && " Pola satu entitas menyamar jadi banyak holder."}
+                  </p>
+                </div>
               </div>
             ))
           ) : (
-            <div className="sig" style={{ color: "var(--safe)" }}>
-              [CLEAN]{" "}
+            <div className="cleanbox" style={{ color: "var(--safe)" }}>
+              ✓{" "}
               <span style={{ color: "var(--text)" }}>
                 Gak ada dua holder yang berbagi funder — no obvious single-entity cluster.
               </span>
             </div>
           )}
 
-          <table className="whales" style={{ marginTop: 10 }}>
+          <table className="whales" style={{ marginTop: 12 }}>
             <thead>
               <tr>
                 <th>holder</th>
@@ -98,7 +133,11 @@ export function TraceSection({ address }: { address: string }) {
 
           {res.report && (
             <div className="notebox" style={{ marginTop: 12 }}>
-              <div style={{ fontWeight: 700, color: susColor[res.report.suspicion] }}>
+              <div style={{
+                fontWeight: 700,
+                color: susColor[res.report.suspicion],
+                textShadow: "0 0 14px color-mix(in srgb, currentColor 45%, transparent)",
+              }}>
                 CLUSTER SUSPICION: {res.report.suspicion}
               </div>
               <div style={{ marginTop: 6 }}>{res.report.summary}</div>

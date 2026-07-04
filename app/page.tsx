@@ -124,7 +124,7 @@ export default function Home() {
           <div className="seclabel">raw signals</div>
           {res.signals.map((s, i) => (
             <div className="sig" key={i} style={{ color: lvlColor(s.lvl) }}>
-              [{s.lvl.toUpperCase()}]{" "}
+              <span className="sigdot" />
               <span style={{ color: "var(--text)" }}>{s.txt}</span>
             </div>
           ))}
