@@ -46,6 +46,9 @@ export default function Home() {
     <main className="wrap">
       <div className="eyebrow">on-chain risk // pre-entry check</div>
       <h1>Token Security Copilot</h1>
+      <a href="/accuracy" className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>
+        › accuracy tracking
+      </a>
       <p className="sub">
         Paste a contract address. The copilot pulls market structure + on-chain
         security (holders, dev wallet, honeypot, LP lock) and reasons through
