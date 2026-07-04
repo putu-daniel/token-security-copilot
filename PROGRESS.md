@@ -11,7 +11,7 @@
 |---|---|---|
 | M1 — Port + deploy | ✅ **SELESAI (4 Jul)** | Live full (AI verdict aktif) di https://token-security-copilot.vercel.app |
 | M2 — Wallet forensics | 🔴 Belum mulai | Fitur pembeda utama, porsi waktu terbesar |
-| M3 — Scan history + outcome | 🔴 Belum mulai | **Deadline dikonfirmasi masih lama (4 Jul) → build versi penuh** (Supabase + cron) |
+| M3 — Scan history + outcome | 🟡 **Layer 1 LIVE (4 Jul)** | Tiap scan tercatat ke Supabase (tabel `scans`, RLS on). Sisa: cron re-check 24h/7d + accuracy table |
 | M4 — Polish + pitch | 🔴 Belum mulai | |
 
 ---
@@ -73,8 +73,8 @@
 ## 🔜 Rencana berikutnya (disepakati 4 Jul)
 
 1. ~~Adapter Solana holders~~ → **SELESAI 4 Jul, live di production.** `lib/sources/solana-holders.ts` (Helius: `getTokenLargestAccounts` + `getTokenSupply`), fallback di `fetchSolana` goplus.ts. Holder >5% di-tag "(likely pool)" & di-exclude dari top10Pct. Env var `HELIUS_RPC_URL` terpasang lokal + Vercel. Catatan: data holder DEXScreener web TIDAK tersedia di API publiknya — makanya via Helius.
-2. **Supabase insert per scan** (cicilan M3) — mulai nabung data accuracy.
-3. **M2 wallet forensics** — Etherscan (EVM) + Helius (Solana, key sudah ada).
+2. ~~Supabase insert per scan~~ → **LIVE 4 Jul.** `lib/scan-log.ts` (REST PostgREST, fire-and-forget via `after()`), tabel `scans` di project Supabase `token-security-copilot` (region SG, RLS on, akses via secret key `sb_secret_...` server-side). Baris pertama: CAKE CAUTION/28 07:02 UTC. Sisa M3 nanti: Vercel cron re-check 24h/7d + halaman accuracy.
+3. **M2 wallet forensics** — Etherscan (EVM) + Helius (Solana, key sudah ada). ← NEXT, kerjaan besar.
 
 ## 🐛 Bug yang sudah difix (4 Jul)
 
