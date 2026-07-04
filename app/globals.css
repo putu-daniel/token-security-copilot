@@ -2,8 +2,8 @@
   --bg: #0B0E14; --surface: #131822; --surface2: #1A2130; --line: #232C3D;
   --text: #E8ECF4; --muted: #8A94A6; --dim: #5A6478;
   --safe: #3DDC97; --warn: #FFB020; --danger: #FF4D5E; --accent: #7EA0FF;
-  --mono: "JetBrains Mono", "SF Mono", "Fira Code", ui-monospace, monospace;
-  --sans: "Inter", -apple-system, "Segoe UI", sans-serif;
+  --mono: var(--font-mono), "SF Mono", "Fira Code", ui-monospace, monospace;
+  --sans: var(--font-sans), -apple-system, "Segoe UI", sans-serif;
 }
 * { box-sizing: border-box; }
 body {
