@@ -10,7 +10,7 @@
 | Milestone | Status | Catatan |
 |---|---|---|
 | M1 — Port + deploy | ✅ **SELESAI (4 Jul)** | Live full (AI verdict aktif) di https://token-security-copilot.vercel.app |
-| M2 — Wallet forensics | 🟡 **Inti LIVE (4 Jul)** | Funding trace + cluster detection + AI forensics jalan di production (ethereum/arbitrum/polygon). Sisa: adapter BSC (Moralis/Covalent) + Solana (Helius) |
+| M2 — Wallet forensics | 🟢 **EVM + Solana LIVE (4 Jul)** | Funding trace + cluster + AI forensics jalan: ethereum/arbitrum/polygon (Etherscan) + solana (Helius). Sisa: adapter BSC (Moralis/Covalent) |
 | M3 — Scan history + outcome | 🟡 **Layer 1 LIVE (4 Jul)** | Tiap scan tercatat ke Supabase (tabel `scans`, RLS on). Sisa: cron re-check 24h/7d + accuracy table |
 | M4 — Polish + pitch | 🔴 Belum mulai | |
 
@@ -77,8 +77,13 @@
 3. ~~M2 inti~~ → **LIVE 4 Jul.** `/api/trace`: top-10 holder → first-funder (Etherscan V2, sequential 250ms) → cluster ≥2 holder se-funder → AI forensics (`runTraceAnalysis`). UI: `TraceSection` (tombol muncul di chain yang didukung). Teruji PEPE: 9 holder, 0 cluster palsu, AI diskon exchange wallet.
    ⚠️ **Etherscan free tier cuma cover ethereum/arbitrum/polygon** (diverifikasi) — BSC/Base/Optimism minta paid.
 4. **M2 lanjutan — BSC trace** (penting: hackathon BNB Chain!): bikin adapter Moralis atau Covalent GoldRush (free tier cover BSC) → `lib/sources/<provider>.ts`, slot di `traceFunders`. Demo ideal: token sketchy BSC dengan cluster kedetect.
-5. **M2 lanjutan — Solana trace** via Helius (`getSignaturesForAddress` + parsed tx).
-6. **M3 lanjutan** — Vercel cron re-check 24h/7d + halaman accuracy.
+5. ~~M2 Solana trace~~ → **LIVE 4 Jul.** `lib/sources/solana-trace.ts`: ATA → owner (getMultipleAccounts) → tx tertua (getSignaturesForAddress, cap 3 halaman) → funder. Pool vault di-exclude, multi-ATA per owner digabung. Retry untuk error "index service overloaded" (token holder jutaan). Teruji FREEDOM250 (cluster 5 wallet/1 funder → HIGH) vs BONK (clean → LOW).
+6. **M2 lanjutan — BSC trace** (penting hackathon BNB): adapter Moralis/Covalent (Etherscan free gak cover BSC).
+7. **M3 lanjutan** — Vercel cron re-check 24h/7d + halaman accuracy.
+
+## ⭐ Demo emas (buat pitch M4)
+
+- **FREEDOM250 (Solana pump.fun)** — 1 funder `6C3Zx…` bikin 5 dari 10 top holder dalam 2 hari → AI: "one entity splitting a bag across sock-puppet accounts ahead of a possible dump" → HIGH. Kontras: BONK → LOW/0 cluster. ⚠️ Trace = snapshot; buat slide, bekukan screenshot hasil bagus (holder bisa berubah kalau di-scan ulang).
 
 ## 🐛 Bug yang sudah difix (4 Jul)
 
