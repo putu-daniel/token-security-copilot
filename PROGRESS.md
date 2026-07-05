@@ -30,13 +30,16 @@
 - **Terverifikasi dengan tes sintetis**: token fiktif RUGME (died) berbagi funder → trace ulang FREEDOM250 → suspicion melompat LOW→HIGH, AI menyebut "serial rug-operator on another (now-dead) token". Memori mengubah verdict = self-improving yang demoable.
 - Efek jaringan: tiap trace user mana pun memperkaya memori → makin dipakai makin pintar.
 
-### 📡 Radar — LIVE (4 Jul)
+### 📡 Radar — LIVE (4 Jul, v2)
 - **Funnel lengkap: research market → check security.** `/radar` = discovery layer.
-- Sumber: DEXScreener `token-boosts/top/v1` (token yang **bayar promosi** sekarang = proxy "viral" jujur). Adapter: `lib/sources/radar-feed.ts`.
-- `/api/radar`: batch 12 token → pipeline existing (market + GoPlus/Helius + heuristics, **tanpa AI**) → ranking risk-first. ~9 detik, CDN cache 2 menit.
-- Kolom whale structure (top10 % + dev %) = indikator rug jangka pendek (permintaan Daniel). Forensics penuh TIDAK di batch (rate limit) — klik baris → `/?address=...` auto-scan (page.tsx baca query param).
+- Sumber (v2): **3 feed DEXScreener** di-merge — `token-boosts/top` (boosted), `token-boosts/latest` (new promo), `token-profiles/latest` (new listing). Tiap baris di-tag sumbernya. Adapter: `lib/sources/radar-feed.ts`.
+- `/api/radar`: batch 18 token → pipeline existing (market + GoPlus/Helius + heuristics, **tanpa AI**) → ranking risk-first. ~12 detik, CDN cache 2 menit.
+- Kolom: source tag, boost⚡, whale structure (top10/dev %), Δ24h. Flag **💸 exit liquidity** = boost ≥100 + ada danger (bayar mahal narik pembeli ke token jelek).
+- **Snapshot ke Supabase** (`radar_snapshots`, dedup per batch 30-menit) → cron M3 (`recheckRadarSnapshots`) label outcome → statistik di `/accuracy`: "dari N token Radar, M mati; dari yang di-tag dirty, X mati". Ini bukti flag Radar sejalan dengan yang runtuh.
+- Forensics penuh TIDAK di batch (rate limit) — klik baris → `/?address=...` auto-scan.
 - ⚠️ Jaga framing di semua copy: "menyaring jebakan dari yang lagi rame", momentum = Δ24h faktual. JANGAN pernah tulis "potensi naik".
-- Anekdot pitch: FREEDOM250 (HIGH RISK pagi 4 Jul, liq $34.9k) → sore liq $5k (-85%), muncul di radar dengan 2 danger. Verdict terbukti dalam sehari.
+- Anekdot pitch: FREEDOM250 (HIGH RISK pagi 4 Jul, liq $34.9k) → sore liq $5k (-85%). Verdict terbukti dalam sehari.
+- ⚙️ Kriteria scoring (untuk Q&A): heuristik threshold di `lib/heuristics.ts` (deterministik, auditable) → AI timbang 0-100 (bobot: security > liq depth > liq/FDV). Skor Radar ngumpul ~72/HIGH RISK karena populasinya token promo umur <24h — itu temuan, bukan over-flag. Kontrol: CAKE 28, BONK 45.
 
 ---
 

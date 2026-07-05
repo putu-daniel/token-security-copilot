@@ -72,6 +72,38 @@ export async function recheckStale(minAgeHours = 24, batch = 30): Promise<Rechec
   return { checked: rows.length, died, survived, skipped: false };
 }
 
+// Re-check radar snapshot (token yang pernah nangkring di Radar) — outcome-nya
+// yang bikin statistik "N token boosted mati dalam seminggu" bisa dihitung.
+export async function recheckRadarSnapshots(minAgeHours = 24, batch = 30): Promise<RecheckResult> {
+  const h = H();
+  if (!h) return { checked: 0, died: 0, survived: 0, skipped: true };
+
+  const cutoff = new Date(Date.now() - minAgeHours * 3600_000).toISOString();
+  const rows: any[] = await fetch(
+    `${h.url}/rest/v1/radar_snapshots?rechecked_at=is.null&created_at=lt.${cutoff}` +
+      `&select=id,address,liquidity_usd&order=created_at.asc&limit=${batch}`,
+    { headers: h.headers, cache: "no-store" }
+  ).then((r) => r.json()).catch(() => []);
+  if (!Array.isArray(rows) || !rows.length) {
+    return { checked: 0, died: 0, survived: 0, skipped: false };
+  }
+
+  let died = 0, survived = 0;
+  for (const row of rows) {
+    const market = await fetchMarket(row.address).catch(() => null);
+    const nowLiq = market?.liquidityUsd ?? null;
+    const outcome = classify(row.liquidity_usd, nowLiq);
+    outcome === "died" ? died++ : survived++;
+    await fetch(`${h.url}/rest/v1/radar_snapshots?id=eq.${row.id}`, {
+      method: "PATCH",
+      headers: { ...h.headers, Prefer: "return=minimal" },
+      body: JSON.stringify({ rechecked_at: new Date().toISOString(), outcome }),
+    }).catch(() => {});
+    await delay(250);
+  }
+  return { checked: rows.length, died, survived, skipped: false };
+}
+
 export interface VerdictAccuracy {
   verdict: string;
   total: number;   // total yang sudah di-recheck di bucket ini
@@ -79,18 +111,27 @@ export interface VerdictAccuracy {
   diedPct: number; // 0-100
 }
 
+export interface RadarStat {
+  tracked: number;   // snapshot yang sudah dicek outcome-nya
+  died: number;
+  diedPct: number;
+  dirtyDied: number; // dari yang PUNYA danger, berapa yang mati
+  dirtyTotal: number;
+}
+
 export interface AccuracyData {
   configured: boolean;
   totalScans: number;
   totalRechecked: number;
   byVerdict: VerdictAccuracy[];
+  radar: RadarStat | null;
 }
 
 const VERDICT_ORDER = ["AVOID", "HIGH RISK", "CAUTION", "ACCEPTABLE"];
 
 export async function getAccuracy(): Promise<AccuracyData> {
   const h = H();
-  if (!h) return { configured: false, totalScans: 0, totalRechecked: 0, byVerdict: [] };
+  if (!h) return { configured: false, totalScans: 0, totalRechecked: 0, byVerdict: [], radar: null };
 
   // total scan: minta count lewat header content-range "0-0/NN"
   let totalScans = 0;
@@ -129,10 +170,30 @@ export async function getAccuracy(): Promise<AccuracyData> {
     }))
     .sort((a, b) => VERDICT_ORDER.indexOf(a.verdict) - VERDICT_ORDER.indexOf(b.verdict));
 
+  // Statistik Radar: dari token yang pernah nangkring di Radar & sudah dicek,
+  // berapa yang mati — dan dari yang kami tandai "dirty" (punya danger).
+  const rsnap: any[] = await fetch(
+    `${h.url}/rest/v1/radar_snapshots?outcome=not.is.null&select=outcome,dangers`,
+    { headers: h.headers, cache: "no-store" }
+  ).then((r) => r.json()).catch(() => []);
+  let radar: RadarStat | null = null;
+  if (Array.isArray(rsnap) && rsnap.length) {
+    const died = rsnap.filter((r) => r.outcome === "died").length;
+    const dirty = rsnap.filter((r) => (r.dangers ?? 0) > 0);
+    radar = {
+      tracked: rsnap.length,
+      died,
+      diedPct: Math.round((died / rsnap.length) * 100),
+      dirtyTotal: dirty.length,
+      dirtyDied: dirty.filter((r) => r.outcome === "died").length,
+    };
+  }
+
   return {
     configured: true,
     totalScans,
     totalRechecked: Array.isArray(rows) ? rows.length : 0,
     byVerdict,
+    radar,
   };
 }

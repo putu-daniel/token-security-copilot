@@ -2,7 +2,7 @@
 // tentukan hidup/mati, tulis outcome ke Supabase.
 // Manual test: /api/cron/recheck?minAgeHours=0  (butuh header cron secret kalau diset).
 import { NextResponse } from "next/server";
-import { recheckStale } from "@/lib/accuracy";
+import { recheckStale, recheckRadarSnapshots } from "@/lib/accuracy";
 
 export const maxDuration = 60;
 
@@ -20,6 +20,8 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const minAgeHours = Number(url.searchParams.get("minAgeHours") ?? "24");
 
-  const result = await recheckStale(Number.isFinite(minAgeHours) ? minAgeHours : 24);
-  return NextResponse.json(result);
+  const age = Number.isFinite(minAgeHours) ? minAgeHours : 24;
+  const scans = await recheckStale(age);
+  const radar = await recheckRadarSnapshots(age);
+  return NextResponse.json({ scans, radar });
 }

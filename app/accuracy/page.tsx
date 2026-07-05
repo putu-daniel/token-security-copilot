@@ -67,6 +67,21 @@ export default async function AccuracyPage() {
             Idealnya % mati tinggi di AVOID / HIGH RISK dan rendah di ACCEPTABLE —
             itu tanda verdict-nya kalibrasi. Butuh volume scan buat jadi signifikan.
           </p>
+
+          {a.radar && (
+            <div style={{ marginTop: 26 }}>
+              <div className="seclabel">radar outcome — token yang pernah dipromosikan</div>
+              <div className="cleanbox" style={{ borderColor: "var(--mag)", background: "rgba(255,61,154,0.06)" }}>
+                Dari <b>{a.radar.tracked}</b> token yang pernah nangkring di Radar dan sudah
+                dicek: <b style={{ color: "var(--danger)" }}>{a.radar.died} mati</b> ({a.radar.diedPct}%).
+                {a.radar.dirtyTotal > 0 && (
+                  <> Dari <b>{a.radar.dirtyTotal}</b> yang kami tandai <b style={{ color: "var(--danger)" }}>dirty</b>{" "}
+                    (punya danger), <b style={{ color: "var(--danger)" }}>{a.radar.dirtyDied} mati</b> — bukti
+                    flag Radar sejalan dengan yang beneran runtuh.</>
+                )}
+              </div>
+            </div>
+          )}
         </>
       )}
 
